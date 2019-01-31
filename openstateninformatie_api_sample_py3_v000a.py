@@ -1,4 +1,4 @@
-# filenaam:         openstateninformatie_api_sample_py3_v000a.py
+﻿# filenaam:         openstateninformatie_api_sample_py3_v000a.py
 # Functie:          Voorbeeld hoe mbv de api van open StatenInformatie of open raadsinformatie
 #                   in python3 open data opgevraagd kan worden.
 #                   Dit voorbeeld vraagt informatie op over vergaderingen.
@@ -17,9 +17,37 @@
 #
 # command:          python3 openstateninformatie_api_sample_py3_v000.py
 
+# Versies
+# 20193101  Deze versie kan nu ook via de API opgehaalde JSON data, de JSON data recursive printen 
+# 20193001  Deze versie haalt alleen via API Open Staten of Raadsinformatie op
+
 # Tbv om webservices obv een API aan te roepen
 import requests
 import json
+import yaml
+
+def recursivePrintJSONDict (jsonDict):
+# 
+  if (not isinstance(jsonDict,dict)):
+    print("Fout invoer. Inputdata heeft geen JSON format")
+    exit(1)
+  else: 
+    print("{") 
+    #print("else jsonDict is een dict")
+    for element in jsonDict:
+      elementValue = jsonDict[element]
+      if (not isinstance(elementValue,dict)):
+        #print("elementValue is nu geen dict")
+        output = "'%s':'%s'" % (element, elementValue)
+        print(output) 
+      else:
+
+        print("'%s':" % element)
+        recursivePrintJSONDict(elementValue) 
+  print("}") 
+# END recursivePrintJSONDict
+
+
 
 
 ### input ####
@@ -64,14 +92,28 @@ data = response.content
 js = json.loads(data)
 # debug print(js)
 # debug print(json.dumps(js, indent=4)) # hiermee kan men de keys vinden in het bericht   
-print(json.dumps(js, indent=4))
+# print(json.dumps(js, indent=4))
+
 
 # interpreteer de response in JSON format
-# nog afmaken !!!!!!!!!!!!!!!!!!!!!!!!!!!
-#print ('gelezen events',js['events'][0])
-#print ('gelezen events',js['ĺocation'][0])
-# lat = js["results"][0]["geometry"]["location"]["lat"]
-# lng = js["results"][0]["geometry"]["location"]["lng"]
-# print ('lat', lat, 'lng', lng)
+print("type(data):", type(data))
+print("input: %s\n" % (data))
 
+data_dict=yaml.load(data)
+print("type(inpt):", type(data_dict))
 
+if (isinstance(data_dict,dict)):
+   # pak eerst uit tot list
+   inpt_list = data_dict["events"]
+   tel=0
+   for item in inpt_list:
+     tel=tel+1  
+     #print("type(item):", type(item))
+     print("Record %d:" % (tel))
+     recursivePrintJSONDict(item)
+     print(" ")
+else:
+   # geen dict error
+   print("Invoer fout: input is geen JSON file")
+
+print("Klaar")
